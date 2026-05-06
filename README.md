@@ -1,75 +1,61 @@
-# Nuxt Minimal Starter
+# Accesorix - Web Penjualan Aksesoris Handphone
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Accesorix adalah aplikasi web berbasis e-commerce yang dibangun menggunakan Nuxt.js dan Tailwind CSS. Sistem ini dilengkapi dengan integrasi AI untuk memberikan rekomendasi produk secara otomatis.
 
-## Setup
+---
 
-Make sure to install dependencies:
+## Teknologi Utama
 
+- **Frontend**: Nuxt.js, Tailwind CSS  
+- **AI Integration**: Claude AI API (Rekomendasi Produk)  
+- **Environment**: Docker (Simulasi VPS)  
+- **Deployment**: Git, SSH, Ngrok  
+
+---
+
+## Fitur Utama
+
+- Menampilkan katalog produk aksesoris handphone  
+- Sistem kategori dan detail produk  
+- Keranjang belanja dan checkout  
+- Panel admin untuk manajemen produk  
+- Integrasi AI untuk rekomendasi dan deskripsi produk  
+
+---
+
+## 🔄 Alur Implementasi Sistem
+
+### 1. Version Control & Repository
+Project dikelola menggunakan Git dan disimpan pada GitHub untuk memudahkan kolaborasi serta deployment.
+
+---
+
+### 2. Containerization dengan Docker
+Aplikasi dijalankan dalam container Docker untuk memastikan konsistensi environment.
+
+Konfigurasi utama:
+- Base image: Node.js 20  
+- Instalasi OpenSSH untuk akses remote  
+- Build aplikasi Nuxt  
+- Expose port:
+  - `3000` → aplikasi web  
+  - `22` → SSH  
+
+---
+
+### 3. Integrasi AI (Claude API)
+Sistem terintegrasi dengan Claude AI API untuk:
+- menghasilkan deskripsi produk otomatis  
+- memberikan rekomendasi produk berdasarkan data input  
+
+---
+
+### 4. Akses Server via SSH
+Server (container Docker) dapat diakses menggunakan SSH untuk:
+- manajemen aplikasi  
+- monitoring  
+- update sistem  
+
+Contoh akses:
 ```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+ssh root@localhost -p 2222
