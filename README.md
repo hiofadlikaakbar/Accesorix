@@ -7,8 +7,8 @@ Accesorix adalah aplikasi web berbasis e-commerce yang dibangun menggunakan Nuxt
 ## Teknologi Utama
 
 - **Frontend**: Nuxt.js, Tailwind CSS  
-- **AI Integration**: Claude AI API (Rekomendasi Produk)  
-- **Environment**: Docker (Simulasi VPS)  
+- **AI Integration**: Mistral AI API
+- **Environment**: Docker  
 - **Deployment**: Git, SSH, Ngrok  
 
 ---
@@ -43,8 +43,8 @@ Konfigurasi utama:
 
 ---
 
-### 3. Integrasi AI (Claude API)
-Sistem terintegrasi dengan Claude AI API untuk:
+### 3. Integrasi AI (Mistral AI)
+Sistem terintegrasi dengan Mistral AI API untuk:
 - menghasilkan deskripsi produk otomatis  
 - memberikan rekomendasi produk berdasarkan data input  
 
