@@ -458,12 +458,13 @@
       </div>
     </footer>
   </div>
+  <AppChatbot />
 </template>
 
 <script setup>
+import AppChatbot from "../components/AppChatBot.vue";
 const supabase = useSupabaseClient();
 
-// Dummy hero products tetap pakai ini karena hanya ilustrasi
 const heroProducts = [
   {
     name: "Case iPhone 15",
