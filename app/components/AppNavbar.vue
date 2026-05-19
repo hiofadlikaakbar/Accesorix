@@ -1,6 +1,6 @@
 <template>
   <header
-    class="sticky top-0 z-50 transition-all duration-300"
+    class="fixed top-0 left-0 w-full z-50 transition-all duration-300"
     :class="
       scrolled
         ? 'bg-white/90 backdrop-blur-md shadow-(--shadow-soft) border-b border-ghost-200'
