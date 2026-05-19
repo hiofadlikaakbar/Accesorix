@@ -1,6 +1,5 @@
 <template>
-  <div class="bg-ghost">
-    <!-- ===== HERO ===== -->
+  <div class="bg-ghost overflow-x-hidden">
     <section
       class="relative max-w-6xl mx-auto px-6 pt-12 pb-16 lg:pt-20 lg:pb-24"
     >
