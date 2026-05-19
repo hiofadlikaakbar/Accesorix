@@ -203,11 +203,13 @@ async function handleSignup() {
   errorMsg.value = "";
   successMsg.value = "";
 
+  // Validasi password cocok
   if (form.password !== form.confirmPassword) {
     errorMsg.value = "Password dan konfirmasi password tidak cocok.";
     return;
   }
 
+  // Validasi panjang password
   if (form.password.length < 8) {
     errorMsg.value = "Password minimal 8 karakter.";
     return;
@@ -231,12 +233,17 @@ async function handleSignup() {
   if (error) {
     errorMsg.value = error.message;
   } else {
-    successMsg.value = "Akun berhasil dibuat! Cek email kamu untuk verifikasi.";
+    successMsg.value = "Akun berhasil dibuat!";
+
+    // Reset form
     form.fullName = "";
     form.email = "";
     form.phone = "";
     form.password = "";
     form.confirmPassword = "";
+
+    // Redirect ke signin
+    await navigateTo("/auth/signin");
   }
 }
 </script>
