@@ -142,7 +142,7 @@
                   <!-- Dashboard Admin -->
                   <NuxtLink
                     v-if="isAdmin"
-                    to="/dashboard"
+                    to="/admin/products"
                     @click="dropdownOpen = false"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-sm font-body text-sm text-ink-500 hover:text-ink hover:bg-ghost transition-all duration-200"
                   >
@@ -211,7 +211,7 @@
           <!-- Dashboard Mobile -->
           <NuxtLink
             v-if="isAdmin"
-            to="/dashboard"
+            to="/admin/products"
             @click="mobileOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-sm font-body text-sm text-ink-500 hover:text-ink hover:bg-ghost transition-all duration-200"
           >
@@ -254,7 +254,6 @@
     </Transition>
   </header>
 </template>
-
 <script setup>
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
@@ -266,9 +265,7 @@ const mobileOpen = ref(false);
 const dropdownRef = ref(null);
 const cartCount = ref(0);
 
-const isAdmin = computed(() => {
-  return user.value?.user_metadata?.role === "admin";
-});
+const isAdmin = ref(false);
 
 const navLinks = computed(() => {
   const links = [
@@ -291,7 +288,7 @@ const navLinks = computed(() => {
 
   if (isAdmin.value) {
     links.push({
-      to: "/dashboard",
+      to: "/admin/products",
       label: "Dashboard",
       icon: "fa-solid fa-chart-line",
     });
@@ -310,6 +307,24 @@ const userName = computed(() => {
 
 const userInitial = computed(() => {
   return userName.value.charAt(0).toUpperCase();
+});
+
+watchEffect(async () => {
+  if (!user.value) return;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.value.id)
+    .single();
+
+  console.log(data);
+
+  if (data?.role === "admin") {
+    isAdmin.value = true;
+  } else {
+    isAdmin.value = false;
+  }
 });
 
 onMounted(() => {
