@@ -317,7 +317,9 @@ watchEffect(async () => {
     .select("role")
     .eq("id", user.value.id)
     .single();
-
+  console.log("USER:", user.value);
+  console.log("PROFILE:", data);
+  console.log("ERROR:", error);
   console.log(data);
 
   if (data?.role === "admin") {
