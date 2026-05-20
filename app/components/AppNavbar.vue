@@ -275,8 +275,14 @@ const isAdmin = ref(false);
 
 watch(
   () => user.value,
-  async (newUser) => {
-    if (!newUser) {
+  async () => {
+    const {
+      data: { user: currentUser },
+    } = await supabase.auth.getUser();
+
+    console.log(currentUser);
+
+    if (!currentUser) {
       isAdmin.value = false;
       return;
     }
@@ -284,10 +290,9 @@ watch(
     const { data, error } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", newUser.sub)
+      .eq("id", currentUser.id)
       .single();
 
-    console.log("USER:", newUser);
     console.log("PROFILE:", data);
     console.log("ERROR:", error);
 
