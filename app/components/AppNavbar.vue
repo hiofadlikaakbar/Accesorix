@@ -267,7 +267,7 @@ const dropdownRef = ref(null);
 const cartCount = ref(0);
 
 const isAdmin = computed(() => {
-  return user.value?.email === "admin@gmail.com";
+  return user.value?.user_metadata?.role === "admin";
 });
 
 const navLinks = computed(() => {
