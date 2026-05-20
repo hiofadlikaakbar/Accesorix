@@ -284,7 +284,7 @@ watch(
     const { data, error } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", newUser.id)
+      .eq("id", newUser.sub)
       .single();
 
     console.log("USER:", newUser);
@@ -295,7 +295,6 @@ watch(
   },
   { immediate: true },
 );
-
 /*
 |--------------------------------------------------------------------------
 | Navigation Links
