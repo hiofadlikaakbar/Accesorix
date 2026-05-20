@@ -267,6 +267,41 @@ const cartCount = ref(0);
 
 const isAdmin = ref(false);
 
+/*
+|--------------------------------------------------------------------------
+| Check Admin Role
+|--------------------------------------------------------------------------
+*/
+
+watch(
+  () => user.value,
+  async (newUser) => {
+    if (!newUser) {
+      isAdmin.value = false;
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", newUser.id)
+      .single();
+
+    console.log("USER:", newUser);
+    console.log("PROFILE:", data);
+    console.log("ERROR:", error);
+
+    isAdmin.value = data?.role === "admin";
+  },
+  { immediate: true },
+);
+
+/*
+|--------------------------------------------------------------------------
+| Navigation Links
+|--------------------------------------------------------------------------
+*/
+
 const navLinks = computed(() => {
   const links = [
     {
@@ -297,6 +332,12 @@ const navLinks = computed(() => {
   return links;
 });
 
+/*
+|--------------------------------------------------------------------------
+| User Info
+|--------------------------------------------------------------------------
+*/
+
 const userName = computed(() => {
   return (
     user.value?.user_metadata?.full_name ||
@@ -309,25 +350,11 @@ const userInitial = computed(() => {
   return userName.value.charAt(0).toUpperCase();
 });
 
-watchEffect(async () => {
-  if (!user.value) return;
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.value.id)
-    .single();
-  console.log("USER:", user.value);
-  console.log("PROFILE:", data);
-  console.log("ERROR:", error);
-  console.log(data);
-
-  if (data?.role === "admin") {
-    isAdmin.value = true;
-  } else {
-    isAdmin.value = false;
-  }
-});
+/*
+|--------------------------------------------------------------------------
+| Lifecycle
+|--------------------------------------------------------------------------
+*/
 
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
@@ -338,6 +365,12 @@ onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
   document.removeEventListener("click", handleClickOutside);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Functions
+|--------------------------------------------------------------------------
+*/
 
 function handleScroll() {
   scrolled.value = window.scrollY > 10;
