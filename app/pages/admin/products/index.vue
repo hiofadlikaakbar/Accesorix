@@ -9,15 +9,29 @@
           >
             Admin Panel
           </p>
+
           <h1 class="font-display text-3xl text-ink">Manajemen Produk</h1>
         </div>
-        <NuxtLink
-          to="/admin/products/create"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-[var(--radius-md)] bg-ink text-ghost font-body text-sm font-medium shadow-[var(--shadow-btn)] hover:bg-ink-800 transition-all duration-200"
-        >
-          <i class="fa-solid fa-plus text-xs"></i>
-          Tambah Produk
-        </NuxtLink>
+
+        <div class="flex items-center gap-3">
+          <!-- Back Home -->
+          <NuxtLink
+            to="/"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-[var(--radius-md)] border border-ghost-300 text-ink font-body text-sm font-medium hover:bg-ghost transition-all duration-200"
+          >
+            <i class="fa-solid fa-arrow-left text-xs"></i>
+            Kembali
+          </NuxtLink>
+
+          <!-- Tambah Produk -->
+          <NuxtLink
+            to="/admin/products/create"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-[var(--radius-md)] bg-ink text-ghost font-body text-sm font-medium shadow-[var(--shadow-btn)] hover:bg-ink-800 transition-all duration-200"
+          >
+            <i class="fa-solid fa-plus text-xs"></i>
+            Tambah Produk
+          </NuxtLink>
+        </div>
       </div>
 
       <!-- Stats -->

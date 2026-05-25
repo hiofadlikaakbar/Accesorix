@@ -122,16 +122,7 @@
 
                 <div class="p-1.5">
                   <NuxtLink
-                    to="/profile"
-                    @click="dropdownOpen = false"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-sm font-body text-sm text-ink-500 hover:text-ink hover:bg-ghost transition-all duration-200"
-                  >
-                    <i class="fa-solid fa-user w-4 text-center"></i>
-                    Profil Saya
-                  </NuxtLink>
-
-                  <NuxtLink
-                    to="/orders"
+                    to="/cart"
                     @click="dropdownOpen = false"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-sm font-body text-sm text-ink-500 hover:text-ink hover:bg-ghost transition-all duration-200"
                   >
@@ -267,12 +258,7 @@ const cartCount = ref(0);
 
 const isAdmin = ref(false);
 
-/*
-|--------------------------------------------------------------------------
-| Check Admin Role
-|--------------------------------------------------------------------------
-*/
-
+// cek admin
 watch(
   () => user.value,
   async () => {
@@ -300,11 +286,6 @@ watch(
   },
   { immediate: true },
 );
-/*
-|--------------------------------------------------------------------------
-| Navigation Links
-|--------------------------------------------------------------------------
-*/
 
 const navLinks = computed(() => {
   const links = [
@@ -336,12 +317,6 @@ const navLinks = computed(() => {
   return links;
 });
 
-/*
-|--------------------------------------------------------------------------
-| User Info
-|--------------------------------------------------------------------------
-*/
-
 const userName = computed(() => {
   return (
     user.value?.user_metadata?.full_name ||
@@ -354,12 +329,6 @@ const userInitial = computed(() => {
   return userName.value.charAt(0).toUpperCase();
 });
 
-/*
-|--------------------------------------------------------------------------
-| Lifecycle
-|--------------------------------------------------------------------------
-*/
-
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
   document.addEventListener("click", handleClickOutside);
@@ -369,12 +338,6 @@ onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
   document.removeEventListener("click", handleClickOutside);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Functions
-|--------------------------------------------------------------------------
-*/
 
 function handleScroll() {
   scrolled.value = window.scrollY > 10;
