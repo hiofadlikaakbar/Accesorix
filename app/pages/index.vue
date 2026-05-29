@@ -1,11 +1,11 @@
 <template>
   <div class="bg-ghost">
     <section
-      class="relative max-w-6xl mx-auto px-6 pt-12 pb-16 lg:pt-20 lg:pb-24"
+      class="relative max-w-6xl mx-auto px-6 pt-24 pb-16 lg:pt-20 lg:pb-24 min-h-screen lg:min-h-0 flex items-center"
     >
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <!-- Teks -->
-        <div class="space-y-6">
+        <div class="space-y-6 text-center lg:text-left">
           <div
             class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-ghost-200 shadow-(--shadow-soft)"
           >
@@ -59,7 +59,9 @@
           </div>
 
           <!-- Stats -->
-          <div class="flex items-center gap-8 pt-4 border-t border-ghost-200">
+          <div
+            class="flex flex-col lg:flex-row lg:items-center gap-5 lg:gap-8 pt-4 border-t border-ghost-200"
+          >
             <!-- Produk -->
             <div class="flex items-center gap-3">
               <div
@@ -75,10 +77,12 @@
               </div>
             </div>
 
-            <div class="w-px h-8 bg-ghost-200"></div>
+            <div class="hidden lg:block w-px h-8 bg-ghost-200"></div>
 
             <!-- Pelanggan -->
-            <div class="flex items-center gap-3">
+            <div
+              class="flex items-center justify-center lg:justify-start gap-3"
+            >
               <div
                 class="w-10 h-10 rounded-full bg-ghost flex items-center justify-center"
               >
