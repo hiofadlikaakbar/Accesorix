@@ -152,11 +152,9 @@
               <i class="fa-solid fa-bolt text-ghost text-xs"></i>
             </div>
             <div>
-              <p class="font-body text-xs font-medium text-ink">
-                AI Rekomendasi
-              </p>
+              <p class="font-body text-xs font-medium text-ink">Rekomendasi</p>
               <p class="font-body text-[10px] text-ink-300">
-                Dipilihkan untukmu
+                Produk yang mungkin kamu cari
               </p>
             </div>
           </div>
