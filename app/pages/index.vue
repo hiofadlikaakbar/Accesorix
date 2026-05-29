@@ -1,7 +1,7 @@
 <template>
   <div class="bg-ghost">
     <section
-      class="relative max-w-6xl mx-auto px-6 pt-24 pb-16 lg:pt-20 lg:pb-24 min-h-screen lg:min-h-0 flex items-center"
+      class="relative max-w-6xl mx-auto px-6 pt-40 pb-16 lg:pb-24 min-h-screen lg:min-h-0 flex items-center"
     >
       <div class="grid md:grid-cols-2 gap-12 lg:gap-32 items-center">
         <!-- Teks -->
