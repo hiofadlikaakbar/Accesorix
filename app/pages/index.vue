@@ -60,7 +60,7 @@
 
           <!-- Stats -->
           <div
-            class="flex flex-col md:flex-row md:items-center gap-5 md:gap-8 pt-4 border-t border-ghost-200"
+            class="grid grid-cols-1 md:grid-cols-2 lg:flex lg:items-center gap-5 lg:gap-8 pt-4 border-t border-ghost-200"
           >
             <!-- Produk -->
             <div class="flex items-center gap-3">
@@ -69,6 +69,7 @@
               >
                 <i class="fa-solid fa-box text-ink text-sm"></i>
               </div>
+
               <div>
                 <p class="font-display text-2xl text-ink leading-none">100</p>
                 <p class="font-body text-xs text-ink-300 mt-0.5">
@@ -77,17 +78,14 @@
               </div>
             </div>
 
-            <div class="hidden md:block w-px h-8 bg-ghost-200"></div>
-
             <!-- Pelanggan -->
-            <div
-              class="flex items-center justify-center md:justify-start gap-3"
-            >
+            <div class="flex items-center gap-3">
               <div
                 class="w-10 h-10 rounded-full bg-ghost flex items-center justify-center"
               >
                 <i class="fa-solid fa-users text-ink text-sm"></i>
               </div>
+
               <div>
                 <p class="font-display text-2xl text-ink leading-none">1000</p>
                 <p class="font-body text-xs text-ink-300 mt-0.5">
@@ -96,15 +94,14 @@
               </div>
             </div>
 
-            <div class="w-px h-8 bg-ghost-200"></div>
-
             <!-- Rating -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 md:col-span-2 lg:col-span-1">
               <div
                 class="w-10 h-10 rounded-full bg-ghost flex items-center justify-center"
               >
                 <i class="fa-solid fa-star text-ink text-sm"></i>
               </div>
+
               <div>
                 <p class="font-display text-2xl text-ink leading-none">4.4</p>
                 <p class="font-body text-xs text-ink-300 mt-0.5">Rating Toko</p>
