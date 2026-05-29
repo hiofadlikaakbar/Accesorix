@@ -60,7 +60,7 @@
 
           <!-- Stats -->
           <div
-            class="flex flex-col lg:flex-row lg:items-center gap-5 lg:gap-8 pt-4 border-t border-ghost-200"
+            class="flex flex-col md:flex-row md:items-center gap-5 md:gap-8 pt-4 border-t border-ghost-200"
           >
             <!-- Produk -->
             <div class="flex items-center gap-3">
@@ -77,11 +77,11 @@
               </div>
             </div>
 
-            <div class="hidden lg:block w-px h-8 bg-ghost-200"></div>
+            <div class="hidden md:block w-px h-8 bg-ghost-200"></div>
 
             <!-- Pelanggan -->
             <div
-              class="flex items-center justify-center lg:justify-start gap-3"
+              class="flex items-center justify-center md:justify-start gap-3"
             >
               <div
                 class="w-10 h-10 rounded-full bg-ghost flex items-center justify-center"
