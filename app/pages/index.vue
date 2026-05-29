@@ -3,7 +3,7 @@
     <section
       class="relative max-w-6xl mx-auto px-6 pt-24 pb-16 lg:pt-20 lg:pb-24 min-h-screen lg:min-h-0 flex items-center"
     >
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
         <!-- Teks -->
         <div class="space-y-6 text-center lg:text-left">
           <div
@@ -111,7 +111,7 @@
         </div>
 
         <!-- Gambar Produk -->
-        <div class="relative hidden lg:block">
+        <div class="relative hidden md:block">
           <!-- Background blob -->
           <div
             class="absolute inset-0 bg-white rounded-(--radius-xl) shadow-(--shadow-card)"
