@@ -3,18 +3,9 @@
     <section
       class="relative max-w-6xl mx-auto px-6 pt-24 pb-16 lg:pt-20 lg:pb-24 min-h-screen lg:min-h-0 flex items-center"
     >
-      <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="grid md:grid-cols-2 gap-12 lg:gap-32 items-center">
         <!-- Teks -->
         <div class="space-y-6 text-center lg:text-left">
-          <div
-            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-ghost-200 shadow-(--shadow-soft)"
-          >
-            <span class="w-2 h-2 rounded-full bg-ink animate-pulse"></span>
-            <span class="font-body text-xs text-ink-500 tracking-wide"
-              >Aksesori Terbaru Sudah Hadir</span
-            >
-          </div>
-
           <h1
             class="font-display text-4xl lg:text-6xl text-ink leading-tight tracking-tight"
           >
@@ -150,7 +141,7 @@
           <div
             class="absolute -top-4 -right-4 bg-ink text-ghost px-4 py-2 rounded-full shadow-(--shadow-btn)"
           >
-            <p class="font-body text-xs font-medium">✦ New Arrival</p>
+            <p class="font-body text-xs font-medium">New Arrival</p>
           </div>
           <div
             class="absolute -bottom-4 -left-4 bg-white border border-ghost-200 px-4 py-2.5 rounded-md shadow-(--shadow-card) flex items-center gap-2.5"
