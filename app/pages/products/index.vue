@@ -49,8 +49,8 @@
             <option value="created_at_asc">Terlama</option>
             <option value="price_asc">Harga: Termurah</option>
             <option value="price_desc">Harga: Termahal</option>
-            <option value="name_asc">Nama: A–Z</option>
-            <option value="name_desc">Nama: Z–A</option>
+            <option value="name_asc">Nama: A-Z</option>
+            <option value="name_desc">Nama: Z-A</option>
           </select>
 
           <!-- Reset -->
@@ -164,14 +164,6 @@
                   Unggulan
                 </span>
               </div>
-
-              <!-- Quick Add -->
-              <button
-                @click.prevent="addToCart(product)"
-                class="absolute bottom-3 right-3 w-8 h-8 rounded-[var(--radius-sm)] bg-ink text-ghost flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 hover:bg-ink-800 shadow-[var(--shadow-btn)]"
-              >
-                <i class="fa-solid fa-plus text-xs"></i>
-              </button>
             </div>
 
             <!-- Info -->
