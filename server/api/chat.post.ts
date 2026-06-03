@@ -10,18 +10,31 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   try {
-    // ambil produk dari database
-    const { data: products } = await supabase
-      .from("products")
-      .select("name, price, description")
-      .limit(20);
+    const userMessage = String(body.message || "").trim();
 
-    const productContext = products
-      ?.map(
-        (p) =>
-          `Produk: ${p.name}, Harga: Rp${p.price}, Deskripsi: ${p.description}`,
+    // Semua produk untuk konteks AI
+    const { data: allProducts } = await supabase
+      .from("products")
+      .select(
+        `
+        id,
+        name,
+        slug,
+        price,
+        image_url,
+        description,
+        categories(name)
+      `,
       )
-      .join("\n");
+      .limit(50);
+
+    const productContext =
+      allProducts
+        ?.map(
+          (p) =>
+            `Produk: ${p.name}, Harga: Rp${p.price}, Deskripsi: ${p.description || "-"}`,
+        )
+        .join("\n") || "";
 
     const client = new Mistral({
       apiKey: process.env.MISTRAL_API_KEY,
@@ -33,36 +46,73 @@ export default defineEventHandler(async (event) => {
         {
           role: "system",
           content: `
-Kamu adalah AI assistant toko aksesoris HP bernama Accesorix.
+Kamu adalah AI Assistant toko aksesoris HP bernama Accesorix.
 
-Jawab HANYA berdasarkan data produk berikut:
+Jawab hanya berdasarkan produk yang tersedia.
 
 ${productContext}
 
-Tugas:
-- rekomendasikan produk dari database
-- jangan mengarang produk
-- gunakan bahasa santai modern
-- bantu user memilih barang
-          `,
+Aturan:
+- Jangan mengarang produk.
+- Gunakan bahasa Indonesia santai.
+- Jangan gunakan markdown seperti **, ##, atau bullet markdown.
+- Jika ada produk cocok, rekomendasikan dengan ramah.
+- Jika tidak ada produk cocok, beri tahu dengan jujur.
+`,
         },
         {
           role: "user",
-          content: body.message,
+          content: userMessage,
         },
       ],
     });
 
+    const rawReply =
+      response.choices?.[0]?.message?.content ??
+      "Maaf, saya tidak menemukan jawaban.";
+
+    const reply = String(rawReply)
+      .replace(/\*\*/g, "")
+      .replace(/###/g, "")
+      .replace(/##/g, "")
+      .replace(/\*/g, "")
+      .trim();
+
+    // Cari produk berdasarkan kata yang diketik user
+    const keywords = userMessage
+      .toLowerCase()
+      .replace("saya cari", "")
+      .replace("cari", "")
+      .replace("butuh", "")
+      .replace("mau", "")
+      .trim();
+
+    const { data: recommendedProducts } = await supabase
+      .from("products")
+      .select(
+        `
+        id,
+        name,
+        slug,
+        price,
+        image_url,
+        description,
+        categories(name)
+      `,
+      )
+      .or(`name.ilike.%${keywords}%,description.ilike.%${keywords}%`)
+      .limit(4);
+
     return {
-      reply:
-        response.choices?.[0]?.message?.content ||
-        "AI tidak memberikan jawaban.",
+      reply,
+      products: recommendedProducts || [],
     };
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error("CHATBOT ERROR:", error);
 
     return {
       reply: "Maaf, AI sedang mengalami gangguan.",
+      products: [],
     };
   }
 });

@@ -39,15 +39,69 @@
               msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'
             "
           >
-            <div
-              :class="
-                msg.role === 'user'
-                  ? 'bg-ink text-white'
-                  : 'bg-white border border-ghost-200 text-ink'
-              "
-              class="max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm"
-            >
-              {{ msg.content }}
+            <div class="max-w-[85%]">
+              <!-- Bubble -->
+              <div
+                :class="
+                  msg.role === 'user'
+                    ? 'bg-ink text-white'
+                    : 'bg-white border border-ghost-200 text-ink'
+                "
+                class="px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm"
+              >
+                {{ msg.content }}
+              </div>
+
+              <!-- Product Cards -->
+              <div v-if="msg.products?.length" class="mt-3 space-y-2">
+                <div
+                  v-for="product in msg.products"
+                  :key="product.id"
+                  class="bg-white border border-ghost-200 rounded-2xl p-3 flex gap-3 shadow-sm"
+                >
+                  <!-- Image -->
+                  <img
+                    v-if="product.image_url"
+                    :src="product.image_url"
+                    :alt="product.name"
+                    class="w-16 h-16 rounded-xl object-cover"
+                  />
+
+                  <div
+                    v-else
+                    class="w-16 h-16 rounded-xl bg-ghost flex items-center justify-center"
+                  >
+                    <i class="fa-solid fa-image text-ink-300"></i>
+                  </div>
+
+                  <!-- Info -->
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-sm text-ink">
+                      {{ product.name }}
+                    </p>
+
+                    <p class="text-xs text-ink-400 mt-1">
+                      {{ product.categories?.name }}
+                    </p>
+
+                    <p class="text-xs text-ink-500 mt-1 line-clamp-2">
+                      {{ product.description }}
+                    </p>
+
+                    <p class="text-sm font-semibold text-ink mt-2">
+                      Rp {{ Number(product.price).toLocaleString("id-ID") }}
+                    </p>
+
+                    <NuxtLink
+                      :to="`/products/${product.slug}`"
+                      class="inline-flex items-center gap-1 text-xs text-ink mt-2 hover:underline"
+                    >
+                      Lihat Detail
+                      <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </NuxtLink>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -133,6 +187,7 @@ async function sendMessage() {
     messages.value.push({
       role: "assistant",
       content: res.reply,
+      products: res.products || [],
     });
   } catch (err) {
     messages.value.push({
