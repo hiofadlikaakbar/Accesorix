@@ -149,6 +149,8 @@
 </template>
 
 <script setup>
+const supabase = useSupabaseClient();
+
 const open = ref(false);
 const input = ref("");
 const loading = ref(false);
@@ -177,8 +179,15 @@ async function sendMessage() {
   loading.value = true;
 
   try {
+    // Get the active session token to forward to the server for role resolution
+    const { data: { session } } = await supabase.auth.getSession();
+    const accessToken = session?.access_token ?? null;
+
     const res = await $fetch("/api/chat", {
       method: "POST",
+      headers: accessToken
+        ? { Authorization: `Bearer ${accessToken}` }
+        : {},
       body: {
         message: userMessage,
       },

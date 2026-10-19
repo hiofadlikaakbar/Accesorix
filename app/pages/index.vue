@@ -137,27 +137,7 @@
             </div>
           </div>
 
-          <!-- Badge floating -->
-          <div
-            class="absolute -top-4 -right-4 bg-ink text-ghost px-4 py-2 rounded-full shadow-(--shadow-btn)"
-          >
-            <p class="font-body text-xs font-medium">New Arrival</p>
-          </div>
-          <div
-            class="absolute -bottom-4 -left-4 bg-white border border-ghost-200 px-4 py-2.5 rounded-md shadow-(--shadow-card) flex items-center gap-2.5"
-          >
-            <div
-              class="w-8 h-8 rounded-full bg-ink flex items-center justify-center"
-            >
-              <i class="fa-solid fa-bolt text-ghost text-xs"></i>
-            </div>
-            <div>
-              <p class="font-body text-xs font-medium text-ink">Rekomendasi</p>
-              <p class="font-body text-[10px] text-ink-300">
-                Produk yang mungkin kamu cari
-              </p>
-            </div>
-          </div>
+
         </div>
       </div>
     </section>
@@ -212,17 +192,6 @@
       <!-- Header -->
       <div class="flex items-end justify-between mb-8">
         <div>
-          <div
-            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-ink mb-3"
-          >
-            <i
-              class="fa-solid fa-wand-magic-sparkles text-ghost text-[10px]"
-            ></i>
-            <span
-              class="font-body text-[10px] text-ghost tracking-wide uppercase"
-              >AI Rekomendasi</span
-            >
-          </div>
           <h2 class="font-display text-2xl lg:text-3xl text-ink">
             Produk Baru Untukmu
           </h2>
