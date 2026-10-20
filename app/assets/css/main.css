@@ -1,9 +1,11 @@
 @import "tailwindcss";
+
 html,
 body {
   overflow-x: hidden;
   max-width: 100%;
 }
+
 @theme {
   --color-ghost: #f8f8f6;
   --color-ghost-100: #f0f0ed;
@@ -18,7 +20,7 @@ body {
   --color-danger: #c0392b;
   --color-success: #1a7a4a;
 
-  --font-display: "Playfair Display", serif;
+  --font-display: "Inter", serif;
   --font-body: "DM Sans", sans-serif;
   --font-mono: "DM Mono", monospace;
 

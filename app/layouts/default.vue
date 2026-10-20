@@ -4,5 +4,6 @@
     <main>
       <NuxtPage />
     </main>
+    <AppChatBot />
   </div>
 </template>

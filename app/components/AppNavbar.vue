@@ -266,21 +266,16 @@ watch(
       data: { user: currentUser },
     } = await supabase.auth.getUser();
 
-    console.log(currentUser);
-
     if (!currentUser) {
       isAdmin.value = false;
       return;
     }
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", currentUser.id)
       .single();
-
-    console.log("PROFILE:", data);
-    console.log("ERROR:", error);
 
     isAdmin.value = data?.role === "admin";
   },

@@ -3,7 +3,7 @@
     <!-- Chat Box -->
     <transition name="fade">
       <div
-        v-if="open"
+        v-if="isOpen"
         class="w-[350px] h-[500px] bg-white border border-ghost-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col mb-4"
       >
         <!-- Header -->
@@ -22,9 +22,22 @@
             </div>
           </div>
 
-          <button @click="open = false">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              v-if="messages.length > 1"
+              @click="clearChat"
+              title="Bersihkan Percakapan"
+              class="text-white/60 hover:text-white transition-colors p-1 text-xs"
+            >
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+            <button
+              @click="isOpen = false"
+              class="text-white/60 hover:text-white transition-colors p-1"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Messages -->
@@ -140,7 +153,7 @@
 
     <!-- Floating Button -->
     <button
-      @click="open = !open"
+      @click="isOpen = !isOpen"
       class="w-16 h-16 rounded-full bg-ink text-white shadow-2xl flex items-center justify-center hover:scale-105 transition-all"
     >
       <i class="fa-solid fa-robot text-xl"></i>
@@ -151,19 +164,99 @@
 <script setup>
 const supabase = useSupabaseClient();
 
-const open = ref(false);
+const DEFAULT_WELCOME_MESSAGE = {
+  role: "assistant",
+  content:
+    "Halo 👋 Saya AI Assistant Accesorix. Bisa bantu cari headset, charger, atau aksesoris HP lainnya.",
+};
+
+// Global reactive states across pages
+const isOpen = useState("chatbot_is_open", () => false);
+const messages = useState("chatbot_messages", () => [DEFAULT_WELCOME_MESSAGE]);
+
 const input = ref("");
 const loading = ref(false);
-
-const messages = ref([
-  {
-    role: "assistant",
-    content:
-      "Halo 👋 Saya AI Assistant Accesorix. Bisa bantu cari headset, charger, atau aksesoris HP lainnya.",
-  },
-]);
-
 const chatContainer = ref(null);
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+    }
+  });
+}
+
+// Hydrate from localStorage on client-side
+onMounted(() => {
+  if (import.meta.client) {
+    try {
+      const savedMessages = localStorage.getItem("accesorix_chat_messages");
+      if (savedMessages) {
+        const parsed = JSON.parse(savedMessages);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          messages.value = parsed;
+        }
+      }
+
+      const savedOpen = localStorage.getItem("accesorix_chat_open");
+      if (savedOpen !== null) {
+        isOpen.value = savedOpen === "true";
+      }
+    } catch (e) {
+      console.warn("Failed to load chat history from localStorage", e);
+    }
+  }
+
+  if (isOpen.value) {
+    scrollToBottom();
+  }
+});
+
+// Sync messages to localStorage
+watch(
+  messages,
+  (newMessages) => {
+    if (import.meta.client) {
+      try {
+        localStorage.setItem(
+          "accesorix_chat_messages",
+          JSON.stringify(newMessages),
+        );
+      } catch (e) {
+        console.warn("Failed to save chat messages to localStorage", e);
+      }
+    }
+  },
+  { deep: true },
+);
+
+// Sync open/close state to localStorage
+watch(isOpen, (newVal) => {
+  if (import.meta.client) {
+    try {
+      localStorage.setItem("accesorix_chat_open", String(newVal));
+    } catch (e) {
+      console.warn("Failed to save chat open state to localStorage", e);
+    }
+  }
+  if (newVal) {
+    scrollToBottom();
+  }
+});
+
+function clearChat() {
+  messages.value = [DEFAULT_WELCOME_MESSAGE];
+  if (import.meta.client) {
+    try {
+      localStorage.setItem(
+        "accesorix_chat_messages",
+        JSON.stringify(messages.value),
+      );
+    } catch (e) {
+      console.warn("Failed to clear chat storage", e);
+    }
+  }
+}
 
 async function sendMessage() {
   if (!input.value.trim()) return;
@@ -177,10 +270,13 @@ async function sendMessage() {
 
   input.value = "";
   loading.value = true;
+  scrollToBottom();
 
   try {
     // Get the active session token to forward to the server for role resolution
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     const accessToken = session?.access_token ?? null;
 
     const res = await $fetch("/api/chat", {
@@ -195,7 +291,7 @@ async function sendMessage() {
 
     messages.value.push({
       role: "assistant",
-      content: res.reply,
+      content: res.reply || res.error || "Terjadi kesalahan.",
       products: res.products || [],
     });
   } catch (err) {
@@ -203,15 +299,10 @@ async function sendMessage() {
       role: "assistant",
       content: "Terjadi kesalahan.",
     });
+  } finally {
+    loading.value = false;
+    scrollToBottom();
   }
-
-  loading.value = false;
-
-  nextTick(() => {
-    if (chatContainer.value) {
-      chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
-    }
-  });
 }
 </script>
 
@@ -227,3 +318,4 @@ async function sendMessage() {
   transform: translateY(10px);
 }
 </style>
+

@@ -1,7 +1,23 @@
-import { Mistral } from "@mistralai/mistralai";
+import { GoogleGenAI } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
 
-// Keywords that signal admin-restricted inventory queries
+// Helper to abort or reject operations after a specified timeout
+function withTimeout<T>(
+  promise: PromiseLike<T>,
+  ms: number,
+  errorMessage = "Request timed out",
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(errorMessage)), ms);
+  });
+  return Promise.race([
+    Promise.resolve(promise).finally(() => clearTimeout(timer)),
+    timeoutPromise,
+  ]);
+}
+
+// Keywords that signal admin restricted inventory queries
 const ADMIN_RESTRICTED_KEYWORDS = [
   "stok",
   "stock",
@@ -26,124 +42,130 @@ function isAdminRestrictedQuery(message: string): boolean {
 }
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig(event);
-
-  // ── Supabase admin client (service role) for privileged DB ops ──────────
-  const supabaseAdmin = createClient(
-    config.supabaseUrl || process.env.SUPABASE_URL!,
-    config.supabaseServiceRoleKey || process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-
-  // ── Resolve caller identity from Authorization header ───────────────────
-  const authHeader = getHeader(event, "authorization");
-  const accessToken = authHeader?.startsWith("Bearer ")
-    ? authHeader.slice(7)
-    : null;
+  console.time("chat-handler");
+  console.log("[1] Start handling request");
 
   let userRole: "admin" | "customer" | "guest" = "guest";
-  let userId: string | null = null;
-
-  if (accessToken) {
-    // Verify the JWT and get the user without trusting client-sent data
-    const { data: { user }, error: authError } =
-      await supabaseAdmin.auth.getUser(accessToken);
-
-    if (!authError && user) {
-      userId = user.id;
-      // Look up role from profiles table (same pattern as AppNavbar.vue)
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      userRole =
-        profile?.role === "admin"
-          ? "admin"
-          : "customer";
-    }
-  }
-
-  const body = await readBody(event);
 
   try {
-    const userMessage = String(body.message || "").trim();
+    const config = useRuntimeConfig(event);
 
-    // ── Guard: block non-admins from restricted queries ──────────────────
+    const supabaseAdmin = createClient(
+      config.supabaseUrl || process.env.SUPABASE_URL!,
+      config.supabaseServiceRoleKey || process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
+
+    const authHeader = getHeader(event, "authorization");
+    const accessToken = authHeader?.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : null;
+
+    if (accessToken) {
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabaseAdmin.auth.getUser(accessToken);
+
+        if (!authError && user) {
+          const { data: profile } = await supabaseAdmin
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+          userRole = profile?.role === "admin" ? "admin" : "customer";
+        }
+      } catch (authErr) {
+        console.warn("Auth check warning:", authErr);
+      }
+    }
+
+    const body = await readBody(event);
+    const userMessage = String(body?.message || "").trim();
+
+    if (!userMessage) {
+      return {
+        reply: "Halo! Ada yang bisa saya bantu terkait produk Accesorix?",
+        products: [],
+        userRole,
+      };
+    }
+
+    // Guard block non-admins from restricted queries
     if (userRole !== "admin" && isAdminRestrictedQuery(userMessage)) {
       return {
         reply:
           "Maaf, saya tidak memiliki akses untuk informasi tersebut. Apakah ada pertanyaan lain seputar produk atau website Accesorix?",
         products: [],
+        userRole,
       };
     }
 
-    // ── Fetch product catalogue (always needed) ───────────────────────────
-    const { data: allProducts } = await supabaseAdmin
-      .from("products")
-      .select(
-        `
-        id,
-        name,
-        slug,
-        price,
-        image_url,
-        description,
-        stock,
-        categories(name)
-      `,
-      )
-      .limit(100);
+    // Fetch product catalogue - optimized: only select necessary columns
+    console.log("[2] Fetching Supabase products...");
+    const { data: productsData, error: productsError } = await withTimeout(
+      supabaseAdmin
+        .from("products")
+        .select("name, price, stock, description")
+        .limit(100),
+      8000,
+      "Supabase products fetch timed out after 8s",
+    );
 
-    // ── Build context based on role ───────────────────────────────────────
+    if (productsError) {
+      throw productsError;
+    }
+
+    const products = productsData || [];
+    console.log("[3] Products fetched successfully:", products?.length);
+
+    // Format real-time stock summary from database
+    let productsStockList = "";
+    if (products.length === 0) {
+      productsStockList =
+        "Tidak ada data produk di database (0 unit / STOK HABIS)";
+    } else {
+      productsStockList = products
+        .map((p) => {
+          const stock = Number(p.stock ?? 0);
+          if (stock <= 0) {
+            return `- ${p.name}: 0 unit (STOK HABIS)`;
+          }
+          return `- ${p.name}: ${stock} unit`;
+        })
+        .join("\n");
+    }
+
+    const productsSummary = `DATA STOK REALTIME DARI DATABASE SUPABASE:\n${productsStockList}`;
+
+    // Build context based on role
     let productContext = "";
     let systemPrompt = "";
 
     if (userRole === "admin") {
-      // Admin gets full context including stock levels
-      productContext =
-        allProducts
-          ?.map(
-            (p) =>
-              `Produk: ${p.name} | Harga: Rp${p.price} | Stok: ${p.stock ?? "tidak diketahui"} unit | Deskripsi: ${p.description || "-"}`,
-          )
-          .join("\n") || "";
+      systemPrompt =
+        `SYSTEM INSTRUCTION: You are Accesorix AI. Below is the EXACT real-time stock inventory fetched directly from the database:
+---
+${productsSummary}
+---
+CRITICAL RULE: Rely strictly and 100% ONLY on the inventory list above. Do NOT assume or invent any stock numbers. If a product has 0 stock or the list shows out of stock, explicitly inform the admin that the item is OUT OF STOCK / KOSONG and needs restocking immediately.
 
-      const lowStockItems = (allProducts || []).filter(
-        (p) => typeof p.stock === "number" && p.stock <= 5,
-      );
-      const lowStockContext =
-        lowStockItems.length > 0
-          ? `\nPeringatan Stok Rendah:\n${lowStockItems.map((p) => `- ${p.name}: ${p.stock} unit tersisa`).join("\n")}`
-          : "\nSemua produk memiliki stok yang cukup.";
-
-      systemPrompt = `
-Kamu adalah AI Assistant internal toko aksesoris HP bernama Accesorix, berbicara dengan seorang ADMIN.
-
-Kamu memiliki akses penuh ke data inventori dan dapat membantu admin dengan:
-- Mengecek stok produk secara langsung
-- Memberikan peringatan jika stok rendah atau habis
-- Merekomendasikan produk mana yang perlu di-restock segera
-
-Data Produk & Stok Saat Ini:
-${productContext}
-${lowStockContext}
-
-Aturan:
-- Gunakan bahasa Indonesia profesional namun tetap ramah.
+Aturan Tambahan:
+- Gunakan bahasa Indonesia profesional dan ramah.
 - Jangan gunakan markdown seperti **, ##, atau bullet markdown.
-- Jika stok suatu produk <= 5 atau habis, sarankan admin untuk segera melakukan restock.
-- Jawab pertanyaan admin secara langsung dan informatif.
-`.trim();
+- Jawab pertanyaan admin secara jujur dan akurat berdasarkan data inventori di atas.`.trim();
     } else {
       // Regular user / guest: no stock info, no admin data
       productContext =
-        allProducts
-          ?.map(
-            (p) =>
-              `Produk: ${p.name} | Harga: Rp${p.price} | Deskripsi: ${p.description || "-"}`,
-          )
-          .join("\n") || "";
+        products
+          .map((p) => {
+            const desc = p.description
+              ? String(p.description).replace(/\s+/g, " ").slice(0, 300).trim()
+              : "-";
+            return `Produk: ${p.name} | Harga: Rp${Number(p.price || 0).toLocaleString("id-ID")} | Deskripsi: ${desc}`;
+          })
+          .join("\n") || "Belum ada produk yang tersedia.";
 
       const roleContext =
         userRole === "customer"
@@ -168,22 +190,30 @@ Aturan:
 `.trim();
     }
 
-    // ── Call Mistral ──────────────────────────────────────────────────────
-    const client = new Mistral({
-      apiKey: config.mistralApiKey || process.env.MISTRAL_API_KEY,
+    // Call Google Gemini API
+    console.log("[4] Sending prompt to Gemini API...");
+
+    const apiKey = config.geminiApiKey || process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not configured on the server");
+    }
+
+    const ai = new GoogleGenAI({
+      apiKey,
     });
 
-    const response = await client.chat.complete({
-      model: "mistral-small-latest",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userMessage },
-      ],
-    });
+    const response = await withTimeout(
+      ai.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: `${systemPrompt}\n\nPertanyaan pengguna: ${userMessage}`,
+      }),
+      15000,
+      "Gemini API request timed out after 15s",
+    );
 
-    const rawReply =
-      response.choices?.[0]?.message?.content ??
-      "Maaf, saya tidak menemukan jawaban.";
+    console.log("[5] Gemini response received!");
+
+    const rawReply = response.text ?? "Maaf, saya tidak menemukan jawaban.";
 
     const reply = String(rawReply)
       .replace(/\*\*/g, "")
@@ -192,51 +222,46 @@ Aturan:
       .replace(/\*/g, "")
       .trim();
 
-    // ── Product recommendations (only for non-admin queries) ──────────────
-    let recommendedProducts: typeof allProducts = [];
+    // Product recommendations (only for non-admin queries)
+    let recommendedProducts: any[] = [];
 
     if (userRole !== "admin") {
-      const keywords = userMessage
-        .toLowerCase()
-        .replace("saya cari", "")
-        .replace("cari", "")
-        .replace("butuh", "")
-        .replace("mau", "")
-        .trim();
+      try {
+        const keywords = userMessage
+          .toLowerCase()
+          .replace(/[^\w\s]/gi, " ")
+          .replace(/\b(saya|cari|butuh|mau|tolong|ada|apakah|bisa|rekomendasi)\b/gi, "")
+          .trim();
 
-      const { data: matched } = await supabaseAdmin
-        .from("products")
-        .select(
-          `
-          id,
-          name,
-          slug,
-          price,
-          image_url,
-          description,
-          stock,
-          categories(name)
-        `,
-        )
-        .or(`name.ilike.%${keywords}%,description.ilike.%${keywords}%`)
-        .limit(4);
+        if (keywords.length >= 2) {
+          const { data: matched } = await supabaseAdmin
+            .from("products")
+            .select("id, name, slug, price, image_url, stock")
+            .or(`name.ilike.%${keywords}%,description.ilike.%${keywords}%`)
+            .limit(4);
 
-      recommendedProducts = matched || [];
+          recommendedProducts = matched || [];
+        }
+      } catch (recErr) {
+        console.warn("Product recommendation error (non-fatal):", recErr);
+      }
     }
 
     return {
       reply,
       products: recommendedProducts,
-      // Expose resolved role so the client can react if needed (non-sensitive)
       userRole,
     };
-  } catch (error) {
-    console.error("CHATBOT ERROR:", error);
+  } catch (err: any) {
+    console.error("CHATBOT ERROR:", err);
 
     return {
-      reply: "Maaf, AI sedang mengalami gangguan.",
+      error: "Terjadi kesalahan pada server AI.",
+      reply: "Maaf, AI sedang mengalami gangguan atau waktu tunggu habis. Silakan coba sesaat lagi.",
       products: [],
       userRole,
     };
+  } finally {
+    console.timeEnd("chat-handler");
   }
 });

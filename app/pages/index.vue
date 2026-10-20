@@ -29,7 +29,7 @@
           </h1>
 
           <p class="font-body text-ink-500 text-base leading-relaxed max-w-sm">
-            Temukan aksesori HP terbaik — dari case, charger, earphone, hingga
+            Temukan aksesori HP terbaik dari case, charger, earphone, hingga
             pelindung layar. Semua dalam satu tempat.
           </p>
 
@@ -62,7 +62,13 @@
               </div>
 
               <div>
-                <p class="font-display text-2xl text-ink leading-none">100</p>
+                <p class="font-display text-2xl text-ink leading-none">
+                  <span
+                    v-if="statsLoading"
+                    class="inline-block w-8 h-6 bg-ghost-200 rounded animate-pulse"
+                  ></span>
+                  <span v-else>{{ Number(productCount).toLocaleString("id-ID") }}</span>
+                </p>
                 <p class="font-body text-xs text-ink-300 mt-0.5">
                   Produk Tersedia
                 </p>
@@ -78,9 +84,15 @@
               </div>
 
               <div>
-                <p class="font-display text-2xl text-ink leading-none">1000</p>
+                <p class="font-display text-2xl text-ink leading-none">
+                  <span
+                    v-if="statsLoading"
+                    class="inline-block w-8 h-6 bg-ghost-200 rounded animate-pulse"
+                  ></span>
+                  <span v-else>{{ Number(customerCount).toLocaleString("id-ID") }}</span>
+                </p>
                 <p class="font-body text-xs text-ink-300 mt-0.5">
-                  Pelanggan Puas
+                  Pelanggan Datang
                 </p>
               </div>
             </div>
@@ -101,43 +113,56 @@
           </div>
         </div>
 
-        <!-- Gambar Produk -->
-        <div class="relative hidden md:block">
-          <!-- Background blob -->
-          <div
-            class="absolute inset-0 bg-white rounded-(--radius-xl) shadow-(--shadow-card)"
-          ></div>
+        <!-- Gambar Produk Preview -->
+        <div class="hidden md:block relative isolate">
+          <!-- Decorative SVG Blob Background -->
+          <svg
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[170%] h-[170%] max-w-none -z-10 pointer-events-none select-none"
+            viewBox="0 0 200 200"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              fill="#0F0F0F"
+              d="M42.7,-66C53.7,-59.4,59.9,-44.8,63.4,-30.8C66.9,-16.9,67.7,-3.5,67.9,11.3C68.2,26.1,68,42.4,61,55.9C54,69.4,40.4,80.1,26,80.7C11.7,81.3,-3.3,71.8,-20,67.3C-36.7,62.7,-55.1,63.2,-67,55C-79,46.8,-84.4,29.8,-82.8,14.4C-81.1,-1.1,-72.4,-15.1,-64.1,-27.5C-55.7,-40,-47.7,-50.8,-37,-57.7C-26.4,-64.5,-13.2,-67.3,1.3,-69.4C15.8,-71.4,31.7,-72.7,42.7,-66Z"
+              transform="translate(100 100)"
+            />
+          </svg>
 
-          <!-- Grid gambar produk dummy -->
-          <div class="relative p-8 grid grid-cols-2 gap-4">
-            <div
-              v-for="(item, i) in heroProducts"
-              :key="i"
-              class="group bg-ghost rounded-(--radius-lg) p-5 flex flex-col items-center gap-3 hover:bg-white hover:shadow-(--shadow-soft) transition-all duration-300 cursor-pointer"
-              :class="i === 1 ? 'mt-6' : i === 3 ? '-mt-6' : ''"
-            >
+          <!-- Outer Card Wrapper -->
+          <div
+            class="relative bg-white rounded-2xl p-6 border border-ghost-200 shadow-(--shadow-card)"
+          >
+            <!-- 2x2 Symmetric Grid -->
+            <div class="relative z-0 grid grid-cols-2 gap-4 items-stretch">
               <div
-                class="w-16 h-16 rounded-md flex items-center justify-center"
-                :class="item.bg"
+                v-for="(item, i) in heroProducts"
+                :key="i"
+                class="group bg-ghost rounded-(--radius-lg) p-5 h-full flex flex-col items-center justify-center text-center hover:bg-white hover:shadow-(--shadow-soft) border border-transparent hover:border-ghost-200 transition-all duration-300 cursor-pointer"
               >
-                <i
-                  :class="item.icon"
-                  class="text-2xl"
-                  :style="{ color: item.color }"
-                ></i>
-              </div>
-              <div class="text-center">
-                <p class="font-body text-xs font-medium text-ink">
-                  {{ item.name }}
-                </p>
-                <p class="font-body text-xs text-ink-300 mt-0.5">
-                  {{ item.price }}
-                </p>
+                <!-- Standardized Icon Container -->
+                <div
+                  class="w-16 h-16 rounded-xl flex items-center justify-center shrink-0 mb-3"
+                  :class="item.bg"
+                >
+                  <i
+                    :class="item.icon"
+                    class="text-2xl"
+                    :style="{ color: item.color }"
+                  ></i>
+                </div>
+                <!-- Consistent Typography -->
+                <div class="text-center w-full">
+                  <p class="font-body text-xs font-medium text-ink">
+                    {{ item.name }}
+                  </p>
+                  <p class="font-body text-xs text-ink-300 mt-0.5">
+                    {{ item.price }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-
-
         </div>
       </div>
     </section>
@@ -166,7 +191,7 @@
           v-for="cat in categories"
           :key="cat.slug"
           :to="`/categories/${cat.slug}`"
-          class="group bg-white rounded-(--radius-lg) p-4 flex flex-col items-center gap-3 border border-ghost-200 hover:border-ink hover:shadow-(--shadow-soft) transition-all duration-200 cursor-pointer"
+          class="group bg-white rounded-(--radius-lg) p-4 flex flex-col items-center gap-3 cursor-pointer"
         >
           <div
             class="w-12 h-12 rounded-md flex items-center justify-center transition-all duration-200 group-hover:scale-110"
@@ -361,8 +386,7 @@
               Gratis Ongkir<br />untuk Semua Order.
             </h2>
             <p class="font-body text-sm text-white/60 max-w-sm leading-relaxed">
-              Belanja minimal Rp150.000 dan nikmati gratis ongkir ke seluruh
-              Indonesia. Berlaku hari ini saja!
+              Belanja minimal Rp150.000! untuk mendapat diskon ongkir
             </p>
           </div>
           <div
@@ -416,38 +440,36 @@
       </div>
     </footer>
   </div>
-  <AppChatbot />
 </template>
 
 <script setup>
-import AppChatbot from "../components/AppChatBot.vue";
 const supabase = useSupabaseClient();
 
 const heroProducts = [
   {
     name: "Case iPhone 15",
-    price: "Rp 89.000",
+    
     icon: "fa-solid fa-mobile-screen",
     bg: "bg-blue-50",
     color: "#3b82f6",
   },
   {
     name: "Charger 65W",
-    price: "Rp 199.000",
+  
     icon: "fa-solid fa-plug",
     bg: "bg-amber-50",
     color: "#f59e0b",
   },
   {
     name: "TWS Earbuds",
-    price: "Rp 349.000",
+   
     icon: "fa-solid fa-headphones",
     bg: "bg-purple-50",
     color: "#8b5cf6",
   },
   {
     name: "Power Bank",
-    price: "Rp 279.000",
+  
     icon: "fa-solid fa-battery-full",
     bg: "bg-green-50",
     color: "#10b981",
@@ -491,8 +513,35 @@ const categories = ref([]);
 const newProducts = ref([]);
 const featuredProducts = ref([]);
 const aiReason = ref("Memuat rekomendasi...");
+const productCount = ref(0);
+const customerCount = ref(0);
+const statsLoading = ref(true);
 
 async function fetchData() {
+  statsLoading.value = true;
+
+  // Fetch dynamic stats in parallel
+  const fetchStatsPromise = (async () => {
+    try {
+      const [productsCountRes, customersCountRes] = await Promise.all([
+        supabase.from("products").select("*", { count: "exact", head: true }),
+        supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("role", "customer"),
+      ]);
+
+      productCount.value = productsCountRes.count ?? 0;
+      customerCount.value = customersCountRes.count ?? 0;
+    } catch (err) {
+      console.error("Error fetching hero stats:", err);
+      productCount.value = 0;
+      customerCount.value = 0;
+    } finally {
+      statsLoading.value = false;
+    }
+  })();
+
   // Fetch categories
   const { data: cats } = await supabase
     .from("categories")
@@ -527,6 +576,8 @@ async function fetchData() {
 
   aiReason.value =
     "Berdasarkan produk yang baru ditambahkan minggu ini, berikut aksesori terbaru yang paling banyak diminati.";
+
+  await fetchStatsPromise;
 }
 
 onMounted(fetchData);

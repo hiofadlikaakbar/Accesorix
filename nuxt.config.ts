@@ -24,7 +24,7 @@ export default defineNuxtConfig({
     // Private - only available server-side
     supabaseUrl: process.env.SUPABASE_URL,
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    mistralApiKey: process.env.MISTRAL_API_KEY,
+    geminiApiKey: process.env.GEMINI_API_KEY,
     public: {
       // Already handled by @nuxtjs/supabase via NUXT_PUBLIC_SUPABASE_URL / KEY
     },

@@ -287,6 +287,5 @@ function resetFilter() {
 
 function addToCart(product) {
   // Akan disambungkan ke cart nanti
-  console.log("Add to cart:", product.name);
 }
 </script>
